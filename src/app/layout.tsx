@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { siteUrl, siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,9 +16,55 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RepoInterview Trainer — Prepárate para tu entrevista técnica",
-  description:
-    "Pega un repositorio de GitHub y una IA te entrevista como un reclutador técnico: preguntas sobre features, código y conceptos, con retroalimentación y puntaje.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteConfig.title,
+    template: "%s · RepoInterview Trainer",
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [
+    "entrevista técnica",
+    "preparación de entrevistas",
+    "preguntas de entrevista de programación",
+    "GitHub",
+    "quiz de código",
+    "práctica de programación",
+    "reclutador con IA",
+    "code review",
+    "desarrollo de software",
+    "entrevistas de TI",
+    "Groq",
+    "Next.js",
+  ],
+  authors: [{ name: "Felipe Toro" }],
+  creator: "Felipe Toro",
+  category: "education",
+  alternates: { canonical: "/" },
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: siteUrl,
+    siteName: siteConfig.name,
+    title: siteConfig.title,
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#16161a",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

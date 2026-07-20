@@ -202,6 +202,30 @@ El nombre del archivo incluye el repositorio y la fecha.
 
 ---
 
+## 🔎 SEO y compartir en redes
+
+La app trae identidad y metadatos listos, todo generado por código (sin assets
+binarios) y coherente con el diseño:
+
+- **Metadatos SEO**: título, descripción, keywords, canonical y `robots`/`sitemap`
+  (`src/app/robots.ts`, `src/app/sitemap.ts`).
+- **Tarjetas para redes** (WhatsApp, LinkedIn, X, Discord, Slack…): imagen Open
+  Graph y Twitter de 1200×630 generada con `next/og`
+  ([`src/app/opengraph-image.tsx`](src/app/opengraph-image.tsx)).
+- **Ícono de la app**: favicon y apple-touch icon con el glifo `</>` de la marca
+  ([`src/app/icon.tsx`](src/app/icon.tsx), `src/app/apple-icon.tsx`).
+- **Web App Manifest** (`src/app/manifest.ts`): instalable como PWA, con
+  `theme_color` y `background_color` de la marca.
+
+Las URLs absolutas (OG, canonical, sitemap) se resuelven solas en Vercel. Si usas un
+**dominio propio**, define `NEXT_PUBLIC_SITE_URL` (ver `.env.example`).
+
+> Tras desplegar, valida las tarjetas en
+> [opengraph.xyz](https://www.opengraph.xyz/) o el
+> [Post Inspector de LinkedIn](https://www.linkedin.com/post-inspector/) pegando tu URL.
+
+---
+
 ## ▲ Desplegar en Vercel
 
 Este proyecto es un Next.js estándar; Vercel lo detecta y construye automáticamente

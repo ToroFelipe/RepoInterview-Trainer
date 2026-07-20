@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Tokens de color derivados de las imágenes de referencia.
+  Base cálida off-white, negro de alto contraste para primarios,
+  y acentos pastel para categorías y estados.
+*/
+:root {
+  --canvas: #f6f5f3;
+  --surface: #ffffff;
+  --surface-muted: #f3f1ee;
+  --border: #ececea;
+  --ink: #16161a;
+  --ink-soft: #3a3a40;
+  /* Oscurecido para cumplir WCAG AA (~4.9:1) en textos pequeños y placeholders.
+     Un gris más claro era la principal causa de baja legibilidad. */
+  --muted: #6c6c68;
+
+  --primary: #16161a;
+  --primary-foreground: #ffffff;
+
+  --pastel-lavender: #ebe7fb;
+  --pastel-blue: #dcebfd;
+  --pastel-peach: #fcecdd;
+  --pastel-green: #e4f4d9;
+  --pastel-yellow: #fbf1cf;
+  --pastel-coral: #fbe1db;
+
+  --good: #4f9d3a;
+  --good-soft: #e4f4d9;
+  --partial: #c99a06;
+  --partial-soft: #fbf1cf;
+  --bad: #d24c3a;
+  --bad-soft: #fbe1db;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 12% -8%, #dbe6f3 0%, rgba(219, 230, 243, 0) 55%),
+    radial-gradient(1100px 620px at 100% 0%, #f6ece1 0%, rgba(246, 236, 225, 0) 50%),
+    var(--canvas);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Scrollbar sutil coherente con la estética limpia */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d9d8d4;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2c1bc;
+  background-clip: content-box;
+}
+
+/* Skeleton shimmer para estados de carga */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-muted);
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Foco accesible consistente */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Respeta preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

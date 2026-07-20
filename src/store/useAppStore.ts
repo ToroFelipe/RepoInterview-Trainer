@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type {
   RepoMeta,
   Pregunta,
@@ -6,6 +7,15 @@ import type {
   Evaluacion,
   QuizConfig,
 } from "@/lib/types";
+
+// Storage seguro para SSR: en el servidor no existe sessionStorage.
+// Usamos sessionStorage (no localStorage) para respetar "nada persiste en servidor"
+// y que el progreso se limpie al cerrar la pestaña.
+const noopStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
 
 export type Fase = "inicio" | "quiz" | "resultados";
 
@@ -51,8 +61,10 @@ const CONFIG_DEFAULT: QuizConfig = {
   foco: "mixto",
 };
 
-export const useAppStore = create<AppState>((set, get) => ({
-  fase: "inicio",
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      fase: "inicio" as Fase,
   repoMeta: null,
   digest: null,
   preguntas: [],
@@ -118,4 +130,26 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { respuestas } = get();
     return Object.values(respuestas).filter((t) => t.trim().length > 0).length;
   },
-}));
+    }),
+    {
+      name: "repoiq-session",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.sessionStorage : noopStorage
+      ),
+      // Rehidratamos manualmente tras montar (ver page.tsx) para no romper la
+      // hidratación de Next: el primer render en cliente coincide con el server.
+      skipHydration: true,
+      // Solo persistimos datos, no las funciones de acción.
+      partialize: (s) => ({
+        fase: s.fase,
+        repoMeta: s.repoMeta,
+        digest: s.digest,
+        preguntas: s.preguntas,
+        config: s.config,
+        indiceActual: s.indiceActual,
+        respuestas: s.respuestas,
+        evaluacion: s.evaluacion,
+      }),
+    }
+  )
+);

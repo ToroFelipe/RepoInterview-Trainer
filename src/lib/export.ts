@@ -27,7 +27,7 @@ function nombreBase(meta: RepoMeta): string {
 }
 
 /** Aplana el reporte en filas para CSV/Excel. */
-function toRows(data: ReporteData) {
+export function toRows(data: ReporteData) {
   return data.preguntas.map((q, i) => {
     const evalQ = data.evaluacion.detalle.find((d) => d.preguntaId === q.id);
     return {
@@ -57,7 +57,8 @@ function descargar(blob: Blob, filename: string) {
 // ============================================================
 //  CSV
 // ============================================================
-export async function exportCSV(data: ReporteData): Promise<void> {
+/** Construye el contenido CSV (testeable en Node). */
+export async function buildCsvString(data: ReporteData): Promise<string> {
   const Papa = (await import("papaparse")).default;
   const rows = toRows(data);
 
@@ -69,7 +70,11 @@ export async function exportCSV(data: ReporteData): Promise<void> {
     "",
   ].join("\n");
 
-  const csv = encabezado + "\n" + Papa.unparse(rows);
+  return encabezado + "\n" + Papa.unparse(rows);
+}
+
+export async function exportCSV(data: ReporteData): Promise<void> {
+  const csv = await buildCsvString(data);
   // BOM para que Excel respete acentos.
   const blob = new Blob(["﻿" + csv], {
     type: "text/csv;charset=utf-8;",
@@ -80,7 +85,8 @@ export async function exportCSV(data: ReporteData): Promise<void> {
 // ============================================================
 //  Excel (.xlsx) con SheetJS
 // ============================================================
-export async function exportXLSX(data: ReporteData): Promise<void> {
+/** Construye el workbook de Excel (testeable en Node). Devuelve XLSX y el wb. */
+export async function buildWorkbook(data: ReporteData) {
   const XLSX = await import("xlsx");
   const rows = toRows(data);
 
@@ -117,15 +123,33 @@ export async function exportXLSX(data: ReporteData): Promise<void> {
   ];
   XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle");
 
+  return { XLSX, wb };
+}
+
+export async function exportXLSX(data: ReporteData): Promise<void> {
+  const { XLSX, wb } = await buildWorkbook(data);
   XLSX.writeFile(wb, `${nombreBase(data.repoMeta)}.xlsx`);
 }
 
 // ============================================================
 //  PDF con jsPDF + autotable
 // ============================================================
-export async function exportPDF(data: ReporteData): Promise<void> {
+// Resuelve la función autoTable de forma robusta: según el bundler/entorno,
+// puede estar en `.default` (webpack/navegador) o en `.default.default` (Node ESM).
+type AutoTableFn = (doc: unknown, options: unknown) => void;
+function resolveAutoTable(mod: unknown): AutoTableFn {
+  const m = mod as { default?: unknown };
+  if (typeof m === "function") return m as AutoTableFn;
+  if (typeof m.default === "function") return m.default as AutoTableFn;
+  const inner = (m.default as { default?: unknown })?.default;
+  if (typeof inner === "function") return inner as AutoTableFn;
+  throw new Error("No se pudo cargar jspdf-autotable.");
+}
+
+/** Construye el documento PDF (testeable en Node). Devuelve el doc de jsPDF. */
+export async function buildPdf(data: ReporteData) {
   const { jsPDF } = await import("jspdf");
-  const autoTable = (await import("jspdf-autotable")).default;
+  const autoTable = resolveAutoTable(await import("jspdf-autotable"));
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const marginX = 40;
@@ -182,11 +206,11 @@ export async function exportPDF(data: ReporteData): Promise<void> {
     headStyles: { fillColor: [22, 22, 26], textColor: 255 },
     columnStyles: {
       0: { cellWidth: 22 },
-      1: { cellWidth: 55 },
-      2: { cellWidth: 150 },
-      3: { cellWidth: 150 },
-      4: { cellWidth: 55 },
-      5: { cellWidth: 28 },
+      1: { cellWidth: 52 },
+      2: { cellWidth: 140 },
+      3: { cellWidth: 140 },
+      4: { cellWidth: 52 },
+      5: { cellWidth: 26 },
     },
     margin: { left: marginX, right: marginX },
   });
@@ -269,5 +293,10 @@ export async function exportPDF(data: ReporteData): Promise<void> {
     });
   }
 
+  return doc;
+}
+
+export async function exportPDF(data: ReporteData): Promise<void> {
+  const doc = await buildPdf(data);
   doc.save(`${nombreBase(data.repoMeta)}.pdf`);
 }

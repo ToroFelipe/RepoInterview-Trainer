@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Code2 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { RepoForm } from "@/components/RepoForm";
@@ -8,6 +9,12 @@ import { ResultsView } from "@/components/ResultsView";
 
 export default function Home() {
   const fase = useAppStore((s) => s.fase);
+
+  // Rehidrata el estado guardado (sessionStorage) tras montar, para recuperar
+  // el progreso si el usuario recarga a mitad del quiz o en resultados.
+  useEffect(() => {
+    useAppStore.persist.rehydrate();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">

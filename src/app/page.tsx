@@ -1,85 +1,64 @@
-"use client";
+import Link from "next/link";
+import { ArrowRight, Github, FileSearch, Users, Sparkles } from "lucide-react";
+import { MODULES, type ModuleId } from "@/lib/modules";
 
-import { useEffect } from "react";
-import { Code2 } from "lucide-react";
-import { useAppStore } from "@/store/useAppStore";
-import { RepoForm } from "@/components/RepoForm";
-import { QuizView } from "@/components/QuizView";
-import { ResultsView } from "@/components/ResultsView";
+const ICONO: Record<ModuleId, React.ReactNode> = {
+  trainer: <Github className="size-6" />,
+  cv: <FileSearch className="size-6" />,
+  entrevista: <Users className="size-6" />,
+};
 
-export default function Home() {
-  const fase = useAppStore((s) => s.fase);
-
-  // Rehidrata el estado guardado (sessionStorage) tras montar, para recuperar
-  // el progreso si el usuario recarga a mitad del quiz o en resultados.
-  useEffect(() => {
-    useAppStore.persist.rehydrate();
-  }, []);
-
+export default function Dashboard() {
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-canvas/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
-              <Code2 className="size-5" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-sm font-semibold text-ink">
-                RepoInterview Trainer
-              </p>
-              <p className="text-[11px] text-muted">
-                Entrena. Responde. Aprende.
-              </p>
-            </div>
-          </div>
-          <FaseIndicador fase={fase} />
+    <div className="mx-auto w-full max-w-5xl px-5 py-12 sm:py-16">
+      {/* Hero */}
+      <div className="mx-auto max-w-2xl text-center animate-fade-up">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3.5 py-1.5 text-xs font-medium text-ink-soft backdrop-blur">
+          <Sparkles className="size-3.5" />
+          Preparación de entrevistas con IA
         </div>
-      </header>
+        <h1 className="text-balance text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+          Todo lo que necesitas para
+          <br />
+          tu próxima entrevista
+        </h1>
+        <p className="mx-auto mt-4 max-w-lg text-pretty text-base leading-relaxed text-ink-soft">
+          Tres herramientas en un solo lugar: entrena con un repositorio,
+          optimiza tu CV y practica la entrevista conductual. Todo con IA y en
+          español.
+        </p>
+      </div>
 
-      {/* Contenido */}
-      <main className="flex flex-1 items-start justify-center px-5 py-10 sm:py-14">
-        {fase === "inicio" && <RepoForm />}
-        {fase === "quiz" && <QuizView />}
-        {fase === "resultados" && <ResultsView />}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border/60 py-5 text-center text-xs text-muted">
-        Hecho para prepararte mejor · Las respuestas se procesan con IA y pueden
-        contener errores.
-      </footer>
-    </div>
-  );
-}
-
-function FaseIndicador({ fase }: { fase: string }) {
-  const pasos = [
-    { id: "inicio", label: "Repo" },
-    { id: "quiz", label: "Quiz" },
-    { id: "resultados", label: "Resultados" },
-  ];
-  const activeIndex = pasos.findIndex((p) => p.id === fase);
-
-  return (
-    <div className="hidden items-center gap-1.5 sm:flex">
-      {pasos.map((p, i) => (
-        <div key={p.id} className="flex items-center gap-1.5">
-          <span
-            className={
-              i <= activeIndex
-                ? "text-xs font-medium text-ink"
-                : "text-xs text-muted"
-            }
+      {/* Tarjetas de módulos */}
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {MODULES.map((m, i) => (
+          <Link
+            key={m.id}
+            href={m.href}
+            style={{ animationDelay: `${Math.min(i * 80, 320)}ms` }}
+            className="group flex flex-col rounded-4xl border border-border bg-surface/80 p-6 shadow-card backdrop-blur-sm transition-all animate-fade-up hover:-translate-y-0.5 hover:shadow-lift"
           >
-            {p.label}
-          </span>
-          {i < pasos.length - 1 && (
-            <span className="text-muted">·</span>
-          )}
-        </div>
-      ))}
+            <div
+              className={`mb-5 inline-flex size-12 items-center justify-center rounded-2xl text-ink ${m.accent}`}
+            >
+              {ICONO[m.id]}
+            </div>
+            <h2 className="text-lg font-semibold text-ink">{m.name}</h2>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft">
+              {m.description}
+            </p>
+            <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ink">
+              Abrir herramienta
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <p className="mt-12 text-center text-xs text-muted">
+        Sin cuentas ni base de datos · Todo vive en tu navegador · Las claves de
+        API solo se usan en el servidor.
+      </p>
     </div>
   );
 }

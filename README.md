@@ -1,11 +1,24 @@
 # RepoInterview Trainer
 
-**Prepárate para entrevistas técnicas a partir de un repositorio de GitHub.**
+**Un pequeño ecosistema de preparación de entrevistas con IA — todo en español.**
 
-Pega la URL de un repositorio público, y una IA actúa como reclutador técnico: lee el
-código, te hace preguntas sobre features, fragmentos de código, funciones y conceptos, y
-al final te entrega una retroalimentación completa con puntaje, aciertos, errores y
-recomendaciones de estudio. Puedes descargar el reporte en **PDF, CSV y Excel**.
+La app agrupa **tres herramientas** con una navegación común, el mismo sistema de diseño
+y un backend compartido (Groq vía API Routes, sin base de datos):
+
+1. **RepoInterview Trainer** (`/trainer`) — pega la URL de un repositorio público y una IA
+   actúa como reclutador técnico: lee el código, te hace preguntas sobre features,
+   fragmentos, funciones y conceptos, y te da feedback con puntaje y plan de estudio.
+2. **Analizador de CV** (`/cv`) — pega tu CV y, opcionalmente, una oferta. La IA evalúa el
+   **match**, detecta **keywords faltantes**, **alertas ATS**, fortalezas/debilidades,
+   reformula responsabilidades en **logros con métricas** y entrega mejoras priorizadas y
+   un resumen reescrito.
+3. **Entrevista Conductual / RRHH** (`/entrevista`) — practica preguntas blandas adaptadas
+   a tu rol y recibe feedback con el método **STAR** (Situación, Tarea, Acción, Resultado),
+   puntaje, fortalezas, mejoras y **respuestas modelo**.
+
+Los tres módulos permiten **descargar el reporte en PDF, CSV y Excel**. Todo el estado
+vive en el navegador (`sessionStorage` para el trainer; `localStorage` para el CV y el
+historial de sesiones conductuales). **No hay base de datos.**
 
 ---
 
@@ -128,35 +141,39 @@ npm run start
 
 ## 🗂️ Estructura del proyecto
 
+La app está organizada por **feature** (`src/features/<módulo>`) para que agregar módulos
+nuevos sea trivial. Lo transversal (cliente Groq, parseo JSON, primitivos de UI, utilidades
+de descarga) se comparte.
+
 ```
 src/
 ├── app/
-│   ├── page.tsx              # SPA por fases: inicio → quiz → resultados
-│   ├── layout.tsx            # Fuentes + metadata
-│   ├── globals.css           # Tokens de color (CSS variables) y estilos base
+│   ├── page.tsx                 # Dashboard: tarjetas de los 3 módulos
+│   ├── layout.tsx               # Navbar + footer globales, fuentes y metadata
+│   ├── trainer/page.tsx         # Módulo 1 (RepoInterview Trainer)
+│   ├── cv/page.tsx              # Módulo 2 (Analizador de CV)
+│   ├── entrevista/page.tsx      # Módulo 3 (Entrevista Conductual)
+│   ├── globals.css              # Tokens de color (CSS variables) y estilos base
 │   └── api/
-│       ├── repo/route.ts     # Lee el repo de GitHub y construye el "digest"
-│       ├── questions/route.ts# Genera preguntas con Groq (JSON)
-│       └── evaluate/route.ts # Evalúa las respuestas con Groq (JSON)
-├── lib/
-│   ├── github.ts             # Parseo de URL, árbol recursivo, raw, digest (con límites)
-│   ├── groq.ts               # Cliente de Groq + fallback de modelo + modo JSON
-│   ├── prompts.ts            # Prompts de sistema en español (reclutador + evaluador)
-│   ├── json.ts               # Parseo seguro de JSON del LLM (limpia fences, recupera)
-│   ├── export.ts             # Exportadores PDF / CSV / XLSX
-│   ├── api.ts                # Cliente fetch del lado del navegador
-│   ├── types.ts              # Tipos compartidos
-│   └── cn.ts                 # Utilidad de clases (clsx + tailwind-merge)
-├── store/
-│   └── useAppStore.ts        # Estado global con Zustand
+│       ├── repo|questions|evaluate/route.ts    # Backend del trainer
+│       ├── cv/route.ts                          # Análisis de CV (Groq, JSON)
+│       └── behavioral/generate|evaluate/route.ts# Entrevista conductual (Groq, JSON)
+├── lib/                         # Transversal
+│   ├── github.ts · groq.ts · json.ts · prompts.ts · types.ts
+│   ├── export.ts               # Exportadores del trainer (PDF/CSV/XLSX)
+│   ├── download.ts             # Helpers de descarga compartidos (blob, slug, autoTable)
+│   ├── modules.ts              # Registro de los módulos (navbar + dashboard)
+│   ├── site.ts · cn.ts
+├── store/useAppStore.ts        # Estado del trainer (Zustand + sessionStorage)
+├── features/
+│   ├── cv/                     # types, prompts, api, useCvStore, export, componentes
+│   └── behavioral/             # types, prompts, api, useBehavioralStore, export, componentes
 └── components/
-    ├── ui/                   # Button, Card, Badge, Segmented (primitivos)
-    ├── RepoForm.tsx          # Pantalla de inicio (URL + configuración)
-    ├── QuizView.tsx          # Quiz interactivo
-    ├── QuestionCard / CodeBlock.tsx  # Fragmentos con syntax highlighting
-    ├── ResultsView.tsx       # Resultados + detalle + recomendaciones
-    ├── ScoreRing.tsx         # Anillo de puntaje
-    └── ExportButtons.tsx     # Descarga PDF / CSV / XLSX
+    ├── ui/                     # Button, Card, Badge, Segmented (primitivos)
+    ├── Navbar.tsx              # Navegación entre módulos
+    ├── DownloadButtons.tsx     # Botones de descarga genéricos (CV / conductual)
+    ├── TrainerApp.tsx          # SPA por fases del trainer
+    ├── RepoForm / QuizView / ResultsView / CodeBlock / ScoreRing / ExportButtons
 ```
 
 ### Presupuesto de lectura del repo

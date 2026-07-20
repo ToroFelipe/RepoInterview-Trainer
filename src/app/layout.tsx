@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { siteUrl, siteConfig } from "@/lib/site";
+import { Navbar } from "@/components/Navbar";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,7 +75,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main className="flex flex-1 flex-col">{children}</main>
+          <footer className="border-t border-border/60 py-5 text-center text-xs text-muted">
+            Hecho para prepararte mejor · Las respuestas se procesan con IA y
+            pueden contener errores.
+          </footer>
+        </div>
+      </body>
     </html>
   );
 }

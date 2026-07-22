@@ -1,4 +1,4 @@
-// Tipos del módulo "Simulador de Entrevista Conductual / RRHH".
+// Tipos del módulo "Simulador de Entrevista por Competencias / RRHH".
 
 export type FocoConductual =
   | "mixto"

@@ -19,7 +19,7 @@ export interface ReporteConductual {
 }
 
 function nombreBase(config: BehavioralConfig): string {
-  return `EntrevistaConductual_${slugify(config.rol || "sin-rol")}_${fechaSlug()}`;
+  return `EntrevistaCompetencias_${slugify(config.rol || "sin-rol")}_${fechaSlug()}`;
 }
 
 /** Representación ASCII de STAR: letra si está presente, "–" si falta. */
@@ -81,7 +81,7 @@ export async function buildBehavioralWorkbook(data: ReporteConductual) {
   const XLSX = await import("xlsx");
 
   const resumen: (string | number)[][] = [
-    ["Entrevista Conductual — Reporte"],
+    ["Entrevista por Competencias — Reporte"],
     [],
     ["Rol", data.config.rol || "—"],
     ["Fecha", new Date().toLocaleString("es")],
@@ -134,7 +134,7 @@ export async function buildBehavioralPdf(data: ReporteConductual) {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("Entrevista Conductual — Reporte", marginX, y);
+  doc.text("Entrevista por Competencias — Reporte", marginX, y);
 
   y += 24;
   doc.setFont("helvetica", "normal");

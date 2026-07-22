@@ -12,13 +12,13 @@ y un backend compartido (Groq vía API Routes, sin base de datos):
    **match**, detecta **keywords faltantes**, **alertas ATS**, fortalezas/debilidades,
    reformula responsabilidades en **logros con métricas** y entrega mejoras priorizadas y
    un resumen reescrito.
-3. **Entrevista Conductual / RRHH** (`/entrevista`) — practica preguntas blandas adaptadas
+3. **Entrevista por Competencias / RRHH** (`/entrevista`) — practica preguntas blandas adaptadas
    a tu rol y recibe feedback con el método **STAR** (Situación, Tarea, Acción, Resultado),
    puntaje, fortalezas, mejoras y **respuestas modelo**.
 
 Los tres módulos permiten **descargar el reporte en PDF, CSV y Excel**. Todo el estado
 vive en el navegador (`sessionStorage` para el trainer; `localStorage` para el CV y el
-historial de sesiones conductuales). **No hay base de datos.**
+historial de sesiones de competencias). **No hay base de datos.**
 
 ---
 
@@ -152,12 +152,12 @@ src/
 │   ├── layout.tsx               # Navbar + footer globales, fuentes y metadata
 │   ├── trainer/page.tsx         # Módulo 1 (RepoInterview Trainer)
 │   ├── cv/page.tsx              # Módulo 2 (Analizador de CV)
-│   ├── entrevista/page.tsx      # Módulo 3 (Entrevista Conductual)
+│   ├── entrevista/page.tsx      # Módulo 3 (Entrevista por Competencias)
 │   ├── globals.css              # Tokens de color (CSS variables) y estilos base
 │   └── api/
 │       ├── repo|questions|evaluate/route.ts    # Backend del trainer
 │       ├── cv/route.ts                          # Análisis de CV (Groq, JSON)
-│       └── behavioral/generate|evaluate/route.ts# Entrevista conductual (Groq, JSON)
+│       └── behavioral/generate|evaluate/route.ts# Entrevista competencias (Groq, JSON)
 ├── lib/                         # Transversal
 │   ├── github.ts · groq.ts · json.ts · prompts.ts · types.ts
 │   ├── export.ts               # Exportadores del trainer (PDF/CSV/XLSX)
@@ -171,7 +171,7 @@ src/
 └── components/
     ├── ui/                     # Button, Card, Badge, Segmented (primitivos)
     ├── Navbar.tsx              # Navegación entre módulos
-    ├── DownloadButtons.tsx     # Botones de descarga genéricos (CV / conductual)
+    ├── DownloadButtons.tsx     # Botones de descarga genéricos (CV / competencias)
     ├── TrainerApp.tsx          # SPA por fases del trainer
     ├── RepoForm / QuizView / ResultsView / CodeBlock / ScoreRing / ExportButtons
 ```

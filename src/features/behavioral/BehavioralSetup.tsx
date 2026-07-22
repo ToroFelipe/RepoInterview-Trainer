@@ -57,12 +57,12 @@ export function BehavioralSetup() {
       <div className="mb-8 text-center animate-fade-up">
         <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3.5 py-1.5 text-xs font-medium text-ink-soft backdrop-blur">
           <Users className="size-3.5" />
-          Entrevista conductual / RRHH
+          Entrevista por competencias / RRHH
         </div>
         <h1 className="text-balance text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-          Practica la
+          Practica la entrevista
           <br />
-          entrevista blanda
+          por competencias
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-pretty text-base leading-relaxed text-ink-soft">
           Preguntas de RRHH adaptadas a tu rol. Responde y recibe feedback con
@@ -147,7 +147,7 @@ export function BehavioralSetup() {
         {cargando && (
           <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-surface-muted/60 p-4 text-sm text-ink-soft animate-fade-in">
             <Loader2 className="size-4 animate-spin" />
-            Preparando tus preguntas conductuales…
+            Preparando tus preguntas de competencias…
           </div>
         )}
       </form>

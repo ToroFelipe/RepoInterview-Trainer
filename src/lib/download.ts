@@ -1,5 +1,5 @@
 // Utilidades compartidas para exportar/descargar archivos desde el navegador.
-// Reutilizadas por los exportadores de cada módulo (CV, conductual, …).
+// Reutilizadas por los exportadores de cada módulo (CV, competencias, …).
 
 /** Fecha en formato YYYY-MM-DD para nombrar archivos. */
 export function fechaSlug(): string {

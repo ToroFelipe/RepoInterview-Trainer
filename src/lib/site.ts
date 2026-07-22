@@ -15,7 +15,7 @@ export const siteConfig = {
   shortName: "RepoInterview",
   title: "RepoInterview Trainer — Prepárate para tu entrevista técnica",
   description:
-    "Tres herramientas con IA para preparar tu entrevista: entrena con un repositorio de GitHub, optimiza tu CV (match y ATS) y practica la entrevista conductual con el método STAR. Con puntaje, feedback y reportes descargables.",
+    "Tres herramientas con IA para preparar tu entrevista: entrena con un repositorio de GitHub, optimiza tu CV (match y ATS) y practica la entrevista por competencias con el método STAR. Con puntaje, feedback y reportes descargables.",
   tagline:
-    "Entrena con un repo, optimiza tu CV y practica la entrevista conductual — todo con IA, puntaje y feedback.",
+    "Entrena con un repo, optimiza tu CV y practica la entrevista por competencias — todo con IA, puntaje y feedback.",
 } as const;

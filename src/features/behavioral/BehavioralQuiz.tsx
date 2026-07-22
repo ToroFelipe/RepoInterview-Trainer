@@ -59,7 +59,7 @@ export function BehavioralQuiz() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-ink">
-            {config.rol.trim() || "Entrevista conductual"}
+            {config.rol.trim() || "Entrevista por competencias"}
           </p>
           <p className="text-xs text-muted">
             {respondidas} de {total} respondidas

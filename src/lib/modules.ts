@@ -40,7 +40,7 @@ export const MODULES: ModuleInfo[] = [
   {
     id: "entrevista",
     href: "/entrevista",
-    name: "Entrevista Conductual",
+    name: "Entrevista por Competencias",
     short: "RRHH",
     description:
       "Practica preguntas blandas y de RRHH, y recibe feedback con el método STAR, puntaje y respuestas modelo.",

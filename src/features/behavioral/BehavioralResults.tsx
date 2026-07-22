@@ -65,10 +65,10 @@ export function BehavioralResults() {
         <div>
           <div className="mb-1 inline-flex items-center gap-1.5 text-xs font-medium text-muted">
             <Trophy className="size-3.5" />
-            Resultados de la entrevista conductual
+            Resultados de la entrevista por competencias
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            {config.rol.trim() || "Entrevista conductual"}
+            {config.rol.trim() || "Entrevista por competencias"}
           </h1>
         </div>
         <Button variant="secondary" size="sm" onClick={reiniciar}>

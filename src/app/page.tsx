@@ -24,7 +24,7 @@ export default function Dashboard() {
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-pretty text-base leading-relaxed text-ink-soft">
           Tres herramientas en un solo lugar: entrena con un repositorio,
-          optimiza tu CV y practica la entrevista conductual. Todo con IA y en
+          optimiza tu CV y practica la entrevista por competencias. Todo con IA y en
           español.
         </p>
       </div>

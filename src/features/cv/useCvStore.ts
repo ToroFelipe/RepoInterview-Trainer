@@ -55,6 +55,43 @@ export const useCvStore = create<CvState>()(
         typeof window !== "undefined" ? window.localStorage : noopStorage
       ),
       skipHydration: true,
+      merge: (persisted, current) => {
+        const p = persisted as Partial<CvState> | undefined;
+        const resultado = p?.resultado
+          ? {
+              ...p.resultado,
+              keywords_faltantes: Array.isArray(p.resultado.keywords_faltantes)
+                ? p.resultado.keywords_faltantes
+                : [],
+              fortalezas: Array.isArray(p.resultado.fortalezas)
+                ? p.resultado.fortalezas
+                : [],
+              debilidades: Array.isArray(p.resultado.debilidades)
+                ? p.resultado.debilidades
+                : [],
+              logros_a_reformular: Array.isArray(p.resultado.logros_a_reformular)
+                ? p.resultado.logros_a_reformular
+                : [],
+              alertas_ats: Array.isArray(p.resultado.alertas_ats)
+                ? p.resultado.alertas_ats
+                : [],
+              sugerencias_priorizadas: Array.isArray(
+                p.resultado.sugerencias_priorizadas
+              )
+                ? p.resultado.sugerencias_priorizadas
+                : [],
+              requisitos_ats: Array.isArray(p.resultado.requisitos_ats)
+                ? p.resultado.requisitos_ats
+                : [],
+            }
+          : null;
+        return {
+          ...current,
+          ...p,
+          resultado,
+          cvsGuardados: Array.isArray(p?.cvsGuardados) ? p.cvsGuardados : [],
+        };
+      },
       partialize: (s) => ({
         cvTexto: s.cvTexto,
         ofertaTexto: s.ofertaTexto,

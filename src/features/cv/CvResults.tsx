@@ -79,7 +79,7 @@ export function CvResults({ analisis }: { analisis: CvAnalisis }) {
           onAbrirModal={() => setModalAbierto(true)}
         />
       ) : (
-        !analisis.requisitos_ats.length && (
+        !(analisis.requisitos_ats?.length ?? 0) && (
           <div className="mt-5 rounded-4xl border border-border bg-pastel-yellow/40 p-6 text-sm leading-relaxed text-ink-soft">
             No se pudo generar el CV optimizado en esta ejecución. Intenta
             analizar tu CV nuevamente.
@@ -88,9 +88,8 @@ export function CvResults({ analisis }: { analisis: CvAnalisis }) {
       )}
 
       {/* Requisitos ATS + puntuación */}
-      {(analisis.puntaje_ats !== undefined || analisis.requisitos_ats.length > 0) && (
-        <AtsCard analisis={analisis} />
-      )}
+      {(analisis.puntaje_ats !== undefined ||
+        (analisis.requisitos_ats?.length ?? 0) > 0) && <AtsCard analisis={analisis} />}
 
       {/* Resumen reescrito */}
       {analisis.resumen_reescrito && (
@@ -297,6 +296,7 @@ function CvOptimizadoCard({
 }
 
 function AtsCard({ analisis }: { analisis: CvAnalisis }) {
+  const requisitos = analisis.requisitos_ats ?? [];
   return (
     <div className="mt-5 rounded-4xl border border-border bg-surface/80 p-6 shadow-soft backdrop-blur-sm sm:p-7">
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -311,13 +311,13 @@ function AtsCard({ analisis }: { analisis: CvAnalisis }) {
           </span>
         )}
       </div>
-      {analisis.requisitos_ats.length > 0 && (
+      {requisitos.length > 0 && (
         <>
           <p className="mb-3 text-sm font-medium text-ink">
             Qué necesita tener tu CV para pasar los filtros ATS
           </p>
           <ul className="space-y-2.5">
-            {analisis.requisitos_ats.map((r, i) => (
+            {requisitos.map((r, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-soft"

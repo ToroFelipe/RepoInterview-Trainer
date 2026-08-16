@@ -14,6 +14,7 @@ import {
   Download,
   Save,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -33,7 +34,13 @@ const MENSAJE = (s: number) =>
     ? "Base decente. Hay mejoras de alto impacto por hacer."
     : "Conviene reforzarlo bastante antes de postular.";
 
-export function CvResults({ analisis }: { analisis: CvAnalisis }) {
+export function CvResults({
+  analisis,
+  generandoCv = false,
+}: {
+  analisis: CvAnalisis;
+  generandoCv?: boolean;
+}) {
   const guardarCv = useCvStore((s) => s.guardarCv);
   const ofertaTexto = useCvStore((s) => s.ofertaTexto);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -78,11 +85,19 @@ export function CvResults({ analisis }: { analisis: CvAnalisis }) {
           analisis={analisis}
           onAbrirModal={() => setModalAbierto(true)}
         />
+      ) : generandoCv ? (
+        <div className="mt-5 flex items-center gap-3 rounded-4xl border border-border bg-surface/80 p-6 shadow-soft backdrop-blur-sm">
+          <Loader2 className="size-5 animate-spin text-primary" />
+          <p className="text-sm text-ink-soft">
+            Generando tu CV optimizado para ATS… esto puede tardar unos
+            segundos.
+          </p>
+        </div>
       ) : (
         !(analisis.requisitos_ats?.length ?? 0) && (
           <div className="mt-5 rounded-4xl border border-border bg-pastel-yellow/40 p-6 text-sm leading-relaxed text-ink-soft">
-            No se pudo generar el CV optimizado en esta ejecución. Intenta
-            analizar tu CV nuevamente.
+            No se pudo generar el CV optimizado en esta ejecución. Puedes
+            volver a analizar tu CV.
           </div>
         )
       )}

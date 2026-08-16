@@ -19,7 +19,9 @@ interface CvState {
 
   setCv: (texto: string) => void;
   setOferta: (texto: string) => void;
-  setResultado: (r: CvAnalisis | null) => void;
+  setResultado: (
+    r: CvAnalisis | null | ((prev: CvAnalisis | null) => CvAnalisis | null)
+  ) => void;
   limpiarResultado: () => void;
   /** Guarda un CV optimizado en la biblioteca local (sin duplicados por id). */
   guardarCv: (cv: CvGuardado) => void;
@@ -37,7 +39,13 @@ export const useCvStore = create<CvState>()(
 
       setCv: (cvTexto) => set({ cvTexto }),
       setOferta: (ofertaTexto) => set({ ofertaTexto }),
-      setResultado: (resultado) => set({ resultado }),
+      setResultado: (resultado) =>
+        set((s) => ({
+          resultado:
+            typeof resultado === "function"
+              ? resultado(s.resultado)
+              : resultado,
+        })),
       limpiarResultado: () => set({ resultado: null }),
       guardarCv: (cv) =>
         set((s) => ({

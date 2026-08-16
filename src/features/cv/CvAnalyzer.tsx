@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCvStore } from "./useCvStore";
-import { analizarCv } from "./api";
+import { analizarCv, optimizarCv } from "./api";
 import { CvResults } from "./CvResults";
 import { MisCVs } from "./MisCVs";
 
@@ -25,11 +25,14 @@ export function CvAnalyzer() {
   const reset = useCvStore((s) => s.reset);
 
   const [analizando, setAnalizando] = useState(false);
+  const [generandoCv, setGenerandoCv] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCv, setErrorCv] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setErrorCv(null);
     if (cvTexto.trim().length < 40) {
       setError("Pega el texto de tu CV (al menos unas líneas).");
       return;
@@ -38,6 +41,28 @@ export function CvAnalyzer() {
     try {
       const analisis = await analizarCv(cvTexto.trim(), ofertaTexto.trim());
       setResultado(analisis);
+
+      // El CV optimizado se genera en una llamada aparte: no bloquea el
+      // análisis ni alarga el tiempo de la primera solicitud (evita 504).
+      setGenerandoCv(true);
+      try {
+        const opt = await optimizarCv(
+          cvTexto.trim(),
+          ofertaTexto.trim(),
+          analisis
+        );
+        setResultado((prev) =>
+          prev ? { ...prev, ...opt } : prev
+        );
+      } catch (err) {
+        setErrorCv(
+          err instanceof Error
+            ? err.message
+            : "No se pudo generar el CV optimizado."
+        );
+      } finally {
+        setGenerandoCv(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocurrió un error.");
     } finally {
@@ -135,7 +160,13 @@ export function CvAnalyzer() {
       {/* Resultados */}
       {resultado && (
         <div className="mt-10">
-          <CvResults analisis={resultado} />
+          {errorCv && (
+            <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-bad/25 bg-bad-soft px-4 py-3 text-sm text-bad animate-fade-in">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span>{errorCv}</span>
+            </div>
+          )}
+          <CvResults analisis={resultado} generandoCv={generandoCv} />
         </div>
       )}
 

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { useCvStore } from "./useCvStore";
 import { analizarCv } from "./api";
 import { CvResults } from "./CvResults";
+import { MisCVs } from "./MisCVs";
 
 export function CvAnalyzer() {
   const cvTexto = useCvStore((s) => s.cvTexto);
@@ -59,7 +60,9 @@ export function CvAnalyzer() {
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-pretty text-base leading-relaxed text-ink-soft">
           Pega tu CV y, opcionalmente, la descripción del puesto. Una IA evalúa
-          el match, detecta huecos y alertas ATS, y te da mejoras priorizadas.
+          el match, detecta huecos y alertas ATS, reescribe tu CV en una
+          versión optimizada para superar los filtros automáticos y lo guarda
+          para reutilizarlo en otras ofertas.
         </p>
       </div>
 
@@ -135,6 +138,9 @@ export function CvAnalyzer() {
           <CvResults analisis={resultado} />
         </div>
       )}
+
+      {/* Biblioteca de CVs optimizados guardados */}
+      <MisCVs />
     </div>
   );
 }

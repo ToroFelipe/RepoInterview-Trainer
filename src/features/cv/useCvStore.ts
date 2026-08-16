@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { CvAnalisis } from "./types";
+import type { CvAnalisis, CvGuardado } from "./types";
 
 // Storage seguro para SSR. A diferencia del trainer, aquí usamos localStorage:
 // el usuario quiere no perder su CV pegado ni el último análisis al recargar.
@@ -14,11 +14,16 @@ interface CvState {
   cvTexto: string;
   ofertaTexto: string;
   resultado: CvAnalisis | null;
+  /** CVs optimizados guardados localmente para reutilizarlos. */
+  cvsGuardados: CvGuardado[];
 
   setCv: (texto: string) => void;
   setOferta: (texto: string) => void;
   setResultado: (r: CvAnalisis | null) => void;
   limpiarResultado: () => void;
+  /** Guarda un CV optimizado en la biblioteca local (sin duplicados por id). */
+  guardarCv: (cv: CvGuardado) => void;
+  eliminarCv: (id: string) => void;
   reset: () => void;
 }
 
@@ -28,11 +33,20 @@ export const useCvStore = create<CvState>()(
       cvTexto: "",
       ofertaTexto: "",
       resultado: null,
+      cvsGuardados: [],
 
       setCv: (cvTexto) => set({ cvTexto }),
       setOferta: (ofertaTexto) => set({ ofertaTexto }),
       setResultado: (resultado) => set({ resultado }),
       limpiarResultado: () => set({ resultado: null }),
+      guardarCv: (cv) =>
+        set((s) => ({
+          cvsGuardados: [cv, ...s.cvsGuardados.filter((c) => c.id !== cv.id)],
+        })),
+      eliminarCv: (id) =>
+        set((s) => ({
+          cvsGuardados: s.cvsGuardados.filter((c) => c.id !== id),
+        })),
       reset: () => set({ cvTexto: "", ofertaTexto: "", resultado: null }),
     }),
     {
@@ -45,6 +59,7 @@ export const useCvStore = create<CvState>()(
         cvTexto: s.cvTexto,
         ofertaTexto: s.ofertaTexto,
         resultado: s.resultado,
+        cvsGuardados: s.cvsGuardados,
       }),
     }
   )

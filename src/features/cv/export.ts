@@ -1,4 +1,4 @@
-import { descargar, fechaSlug } from "@/lib/download";
+import { descargar, fechaSlug, slugify } from "@/lib/download";
 import type { CvAnalisis } from "./types";
 
 function nombreBase(): string {
@@ -179,4 +179,14 @@ export async function buildCvPdf(a: CvAnalisis) {
 export async function exportCvPDF(a: CvAnalisis): Promise<void> {
   const doc = await buildCvPdf(a);
   doc.save(`${nombreBase()}.pdf`);
+}
+
+// ============================================================
+//  CV optimizado en texto plano (.txt) — listo para ATS
+// ============================================================
+export function exportCvTxt(nombre: string, contenido: string): void {
+  const blob = new Blob(["\uFEFF" + contenido], {
+    type: "text/plain;charset=utf-8;",
+  });
+  descargar(blob, `CV_${slugify(nombre) || "optimizado"}_${fechaSlug()}.txt`);
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   FolderOpen,
   Download,
+  FileDown,
   Copy,
   Check,
   Trash2,
@@ -12,13 +13,14 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { exportCvTxt } from "./export";
+import { exportCvTxt, exportCvOptimizadoPdf } from "./export";
 import { useCvStore } from "./useCvStore";
 
 export function MisCVs() {
   const cvsGuardados = useCvStore((s) => s.cvsGuardados);
   const eliminarCv = useCvStore((s) => s.eliminarCv);
   const [copiado, setCopiado] = useState<string | null>(null);
+  const [pdfId, setPdfId] = useState<string | null>(null);
 
   if (!cvsGuardados.length) return null;
 
@@ -29,6 +31,15 @@ export function MisCVs() {
       setTimeout(() => setCopiado(null), 1800);
     } catch {
       /* sin clipboard: ignora */
+    }
+  }
+
+  async function descargarPdf(id: string, nombre: string, contenido: string) {
+    setPdfId(id);
+    try {
+      await exportCvOptimizadoPdf(nombre, contenido);
+    } finally {
+      setPdfId(null);
     }
   }
 
@@ -87,11 +98,19 @@ export function MisCVs() {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button
                 size="sm"
+                onClick={() => descargarPdf(cv.id, cv.nombre, cv.contenido)}
+                loading={pdfId === cv.id}
+              >
+                <FileDown className="size-4" />
+                PDF
+              </Button>
+              <Button
+                size="sm"
                 variant="secondary"
                 onClick={() => exportCvTxt(cv.nombre, cv.contenido)}
               >
                 <Download className="size-4" />
-                Descargar
+                .txt
               </Button>
               <Button
                 size="sm"

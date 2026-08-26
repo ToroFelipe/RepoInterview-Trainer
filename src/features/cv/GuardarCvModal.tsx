@@ -25,6 +25,8 @@ interface GuardarCvModalProps {
   analisis: CvAnalisis;
   /** Fragmento de la oferta usada (contexto para reutilizar el CV). */
   oferta?: string;
+  /** Contenido del CV a guardar (ya editado por el usuario). */
+  contenido?: string;
   /** Valores sugeridos por la IA, editables por el usuario. */
   inicial: { titulo: string; categoria: string; descripcion: string };
   onGuardar: (cv: CvGuardado) => void;
@@ -35,6 +37,7 @@ export function GuardarCvModal({
   abierto,
   analisis,
   oferta,
+  contenido,
   inicial,
   onGuardar,
   onCerrar,
@@ -55,7 +58,7 @@ export function GuardarCvModal({
       nombre: nombre.trim() || "CV Optimizado",
       categoria: categoria.trim() || undefined,
       descripcion: descripcion.trim(),
-      contenido: analisis.cv_optimizado?.contenido ?? "",
+      contenido: contenido ?? analisis.cv_optimizado?.contenido ?? "",
       puntaje_ats: analisis.puntaje_ats ?? 0,
       puntaje_match: analisis.puntaje_match,
       fecha: new Date().toISOString(),

@@ -190,3 +190,69 @@ export function exportCvTxt(nombre: string, contenido: string): void {
   });
   descargar(blob, `CV_${slugify(nombre) || "optimizado"}_${fechaSlug()}.txt`);
 }
+
+// ============================================================
+//  CV optimizado en PDF — texto real seleccionable (apto para ATS)
+// ============================================================
+/** Heurística simple: encabezados de sección van en MAYÚSCULAS y cortos. */
+function esEncabezado(linea: string): boolean {
+  const t = linea.trim();
+  return (
+    t.length > 0 &&
+    t.length <= 42 &&
+    /[A-ZÁÉÍÓÚÑ]/.test(t) &&
+    t === t.toUpperCase() &&
+    !/[.]$/.test(t)
+  );
+}
+
+export async function buildCvOptimizadoPdf(contenido: string) {
+  const { jsPDF } = await import("jspdf");
+
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const marginX = 48;
+  const marginTop = 54;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = doc.internal.pageSize.getWidth() - marginX * 2;
+  const lineH = 14;
+  let y = marginTop;
+
+  const ensure = (need: number) => {
+    if (y + need > pageHeight - 48) {
+      doc.addPage();
+      y = marginTop;
+    }
+  };
+
+  doc.setTextColor(20);
+
+  const lineas = contenido.replace(/\r\n/g, "\n").split("\n");
+  for (const linea of lineas) {
+    if (linea.trim() === "") {
+      y += lineH * 0.55;
+      continue;
+    }
+    const encabezado = esEncabezado(linea);
+    doc.setFont("helvetica", encabezado ? "bold" : "normal");
+    doc.setFontSize(encabezado ? 11.5 : 10.5);
+
+    if (encabezado) ensure(lineH * 1.4);
+    const wrapped = doc.splitTextToSize(linea, maxWidth);
+    for (const l of wrapped) {
+      ensure(lineH);
+      doc.text(l, marginX, y);
+      y += lineH;
+    }
+    if (encabezado) y += 2;
+  }
+
+  return doc;
+}
+
+export async function exportCvOptimizadoPdf(
+  nombre: string,
+  contenido: string
+): Promise<void> {
+  const doc = await buildCvOptimizadoPdf(contenido);
+  doc.save(`CV_${slugify(nombre) || "optimizado"}_${fechaSlug()}.pdf`);
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ThumbsUp,
   AlertTriangle,
@@ -12,15 +12,24 @@ import {
   Check,
   Sparkles,
   Download,
+  FileDown,
   Save,
   FileText,
+  Pencil,
+  RotateCcw,
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { ScoreRing } from "@/components/ScoreRing";
 import { DownloadButtons } from "@/components/DownloadButtons";
 import { Button } from "@/components/ui/Button";
-import { exportCvPDF, exportCvCSV, exportCvXLSX, exportCvTxt } from "./export";
+import {
+  exportCvPDF,
+  exportCvCSV,
+  exportCvXLSX,
+  exportCvTxt,
+  exportCvOptimizadoPdf,
+} from "./export";
 import { useCvStore } from "./useCvStore";
 import { GuardarCvModal } from "./GuardarCvModal";
 import type { CvAnalisis } from "./types";
@@ -44,6 +53,14 @@ export function CvResults({
   const guardarCv = useCvStore((s) => s.guardarCv);
   const ofertaTexto = useCvStore((s) => s.ofertaTexto);
   const [modalAbierto, setModalAbierto] = useState(false);
+
+  // Contenido editable del CV optimizado (editor en vivo). Se resincroniza
+  // cuando la IA entrega un CV nuevo, y alimenta el PDF/.txt/copiar/guardar.
+  const cvOriginal = analisis.cv_optimizado?.contenido ?? "";
+  const [contenidoCv, setContenidoCv] = useState(cvOriginal);
+  useEffect(() => {
+    setContenidoCv(cvOriginal);
+  }, [cvOriginal]);
 
   return (
     <div className="mx-auto w-full max-w-3xl animate-fade-up">
@@ -83,6 +100,9 @@ export function CvResults({
       {analisis.cv_optimizado ? (
         <CvOptimizadoCard
           analisis={analisis}
+          contenido={contenidoCv}
+          contenidoOriginal={cvOriginal}
+          onChange={setContenidoCv}
           onAbrirModal={() => setModalAbierto(true)}
         />
       ) : generandoCv ? (
@@ -221,6 +241,7 @@ export function CvResults({
           abierto={modalAbierto}
           analisis={analisis}
           oferta={ofertaTexto}
+          contenido={contenidoCv}
           inicial={{
             titulo: analisis.cv_optimizado.titulo,
             categoria: analisis.cv_optimizado.categoria ?? "",
@@ -236,21 +257,38 @@ export function CvResults({
 
 function CvOptimizadoCard({
   analisis,
+  contenido,
+  contenidoOriginal,
+  onChange,
   onAbrirModal,
 }: {
   analisis: CvAnalisis;
+  contenido: string;
+  contenidoOriginal: string;
+  onChange: (texto: string) => void;
   onAbrirModal: () => void;
 }) {
   const [copiado, setCopiado] = useState(false);
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
   const cv = analisis.cv_optimizado!;
+  const editado = contenido !== contenidoOriginal;
 
   async function copiar() {
     try {
-      await navigator.clipboard.writeText(cv.contenido);
+      await navigator.clipboard.writeText(contenido);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 1800);
     } catch {
       /* ignora: entorno sin clipboard */
+    }
+  }
+
+  async function descargarPdf() {
+    setDescargandoPdf(true);
+    try {
+      await exportCvOptimizadoPdf(cv.titulo, contenido);
+    } finally {
+      setDescargandoPdf(false);
     }
   }
 
@@ -280,18 +318,46 @@ function CvOptimizadoCard({
         <ScoreRing score={analisis.puntaje_ats ?? 0} size={96} />
       </div>
 
-      <div className="mt-4 max-h-80 overflow-y-auto rounded-2xl border border-border bg-surface p-4 font-mono text-[13px] leading-relaxed text-ink whitespace-pre-wrap">
-        {cv.contenido}
+      {/* Editor en vivo */}
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted">
+          <Pencil className="size-3.5" />
+          Edita el texto antes de descargarlo — los cambios se aplican al PDF,
+          .txt y al CV guardado.
+        </div>
+        {editado && (
+          <button
+            type="button"
+            onClick={() => onChange(contenidoOriginal)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-ink-soft transition hover:bg-surface-muted"
+          >
+            <RotateCcw className="size-3.5" />
+            Restablecer
+          </button>
+        )}
       </div>
 
+      <textarea
+        value={contenido}
+        onChange={(e) => onChange(e.target.value)}
+        spellCheck={false}
+        rows={18}
+        aria-label="Editor del CV optimizado"
+        className="mt-2 h-96 w-full resize-y rounded-2xl border border-border bg-surface p-4 font-mono text-[13px] leading-relaxed text-ink outline-none transition focus:border-ink/30"
+      />
+
       <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Button size="sm" onClick={descargarPdf} loading={descargandoPdf}>
+          <FileDown className="size-4" />
+          Descargar PDF
+        </Button>
         <Button
           size="sm"
           variant="secondary"
-          onClick={() => exportCvTxt(cv.titulo, cv.contenido)}
+          onClick={() => exportCvTxt(cv.titulo, contenido)}
         >
           <Download className="size-4" />
-          Descargar .txt
+          .txt
         </Button>
         <Button size="sm" variant="secondary" onClick={copiar}>
           {copiado ? (
@@ -301,7 +367,7 @@ function CvOptimizadoCard({
           )}
           {copiado ? "Copiado" : "Copiar"}
         </Button>
-        <Button size="sm" onClick={onAbrirModal} className="ml-auto">
+        <Button size="sm" variant="secondary" onClick={onAbrirModal} className="ml-auto">
           <Save className="size-4" />
           Guardar CV
         </Button>

@@ -194,6 +194,53 @@ export function exportCvTxt(nombre: string, contenido: string): void {
 // ============================================================
 //  CV optimizado en PDF — texto real seleccionable (apto para ATS)
 // ============================================================
+// Mapa de puntos de código Unicode -> equivalente ASCII/WinAnsi. Las fuentes
+// estándar de jsPDF (helvetica) descartan estos caracteres y dejan huecos o
+// sueltan la puntuación; normalizamos SOLO para el PDF (el editor y el .txt
+// conservan el Unicode original, que sí renderizan bien).
+const MAPA_UNICODE: Record<number, string> = {
+  0x2010: "-", 0x2011: "-", 0x2012: "-", 0x2013: "-", 0x2014: "-",
+  0x2015: "-", 0x2212: "-",
+  0x2018: "'", 0x2019: "'", 0x201a: "'", 0x201b: "'", 0x2032: "'",
+  0x201c: '"', 0x201d: '"', 0x201e: '"', 0x201f: '"', 0x2033: '"',
+  0x2022: "-", 0x2023: "-", 0x2043: "-", 0x25aa: "-", 0x25cf: "-",
+  0x25e6: "-", 0x2219: "-", 0x2027: "-",
+  0x2026: "...",
+  0x00a0: " ", 0x2000: " ", 0x2001: " ", 0x2002: " ", 0x2003: " ",
+  0x2004: " ", 0x2005: " ", 0x2006: " ", 0x2007: " ", 0x2008: " ",
+  0x2009: " ", 0x200a: " ", 0x202f: " ", 0x205f: " ", 0x3000: " ",
+  0x200b: "", 0x200c: "", 0x200d: "", 0x2060: "", 0xfeff: "",
+};
+
+function sanitizarPdf(texto: string): string {
+  let out = "";
+  for (const ch of texto) {
+    const cp = ch.codePointAt(0);
+    out += cp !== undefined && cp in MAPA_UNICODE ? MAPA_UNICODE[cp] : ch;
+  }
+  return out;
+}
+
+/**
+ * Colapsa texto "espaciado" letra por letra (típico al copiar/pegar títulos con
+ * tracking desde un PDF/Word), p.ej. "D e s a r r o l l a d o r". Solo actúa si
+ * la línea claramente lo parece y si conserva separaciones de palabra (2+
+ * espacios); en caso ambiguo la deja intacta para no unir palabras por error.
+ */
+function colapsarEspaciado(linea: string): string {
+  const tokens = linea.trim().split(/\s+/);
+  if (tokens.length < 6) return linea;
+  const sueltos = tokens.filter((t) => t.length === 1).length;
+  const pareceEspaciado = sueltos / tokens.length > 0.6;
+  if (!pareceEspaciado) return linea;
+  if (!/\S {2,}\S/.test(linea)) return linea; // sin límites de palabra claros
+  return linea
+    .split(/ {2,}/)
+    .map((chunk) => chunk.replace(/ +/g, ""))
+    .join(" ")
+    .trim();
+}
+
 /** Heurística simple: encabezados de sección van en MAYÚSCULAS y cortos. */
 function esEncabezado(linea: string): boolean {
   const t = linea.trim();
@@ -226,8 +273,9 @@ export async function buildCvOptimizadoPdf(contenido: string) {
 
   doc.setTextColor(20);
 
-  const lineas = contenido.replace(/\r\n/g, "\n").split("\n");
-  for (const linea of lineas) {
+  const lineas = sanitizarPdf(contenido).replace(/\r\n/g, "\n").split("\n");
+  for (const cruda of lineas) {
+    const linea = colapsarEspaciado(cruda);
     if (linea.trim() === "") {
       y += lineH * 0.55;
       continue;
